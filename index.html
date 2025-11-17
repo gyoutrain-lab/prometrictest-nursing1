@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -11,6 +11,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/gyoutrain-lab/prometric-nursing-test-commerce2/main/assets/icon17%20(1).jpg">
 
 <style>
+/* Same styles as before (no change) */
 body, html { margin:0; padding:0; font-family:Arial,sans-serif; height:100%; overflow-x:hidden; background:#eef5f5; }
 .top-half { width:100%; height:50vh; background:url('assets/icon17%20(1).jpg') center/cover no-repeat; position:relative; }
 .bottom-half { width:100%; height:50vh; position:relative; display:flex; flex-direction:column; justify-content:flex-end; align-items:flex-start; padding:20px; box-sizing:border-box; overflow:hidden; background:#eef5f5; }
@@ -73,57 +74,25 @@ input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5
 </div>
 
 <script>
-function lazyLoadImage(img){
-  const src = img.getAttribute('data-src');
-  if(src){ img.src = src; img.style.opacity=1; img.removeAttribute('data-src'); }
-}
+function lazyLoadImage(img){ const src = img.getAttribute('data-src'); if(src){ img.src = src; img.style.opacity=1; img.removeAttribute('data-src'); } }
+window.addEventListener('load', ()=>{ const top=document.getElementById('topHalf'); const qr=document.getElementById('danaQR'); top.style.backgroundImage=`url('${top.getAttribute('data-src')}')`; lazyLoadImage(qr); });
 
-window.addEventListener('load', ()=>{
-  const top=document.getElementById('topHalf');
-  const qr=document.getElementById('danaQR');
-  top.style.backgroundImage=`url('${top.getAttribute('data-src')}')`;
-  lazyLoadImage(qr);
-});
+function showNotification(msg,color="#007bff",duration=3500){ const box=document.getElementById("notificationBox"); box.style.backgroundColor=color; box.innerText=msg; box.style.display="block"; setTimeout(()=>{ box.style.display="none"; }, duration); }
 
-function showNotification(msg,color="#007bff",duration=3500){
-  const box=document.getElementById("notificationBox");
-  box.style.backgroundColor=color;
-  box.innerText=msg;
-  box.style.display="block";
-  setTimeout(()=>{ box.style.display="none"; }, duration);
-}
+function confirmPayment(){ const name=document.getElementById("userNameInput").value.trim(); const wa=document.getElementById("userWAInput").value.trim(); if(!name || !wa){ showNotification("Please fill Name + WA.", "#cc0000"); return; } const adminMsg=`Payment Pending:\nName: ${name}\nWA #: ${wa}\nSend proof, admin will provide unlock code.`; window.open(`https://wa.me/6285399652487?text=${encodeURIComponent(adminMsg)}`, "_blank"); showNotification("Enter unlock code provided by admin.", "#ffc107"); }
 
-function confirmPayment(){
-  const name = document.getElementById("userNameInput").value.trim();
-  const wa = document.getElementById("userWAInput").value.trim();
-  if(!name || !wa){ showNotification("Please fill Name + WA.", "#cc0000"); return; }
+function checkUnlockCode(){ const name=document.getElementById("userNameInput").value.trim(); const wa=document.getElementById("userWAInput").value.trim(); const codeInput=document.getElementById("unlockCodeInput").value.trim().toUpperCase(); if(!name || !wa){ showNotification("Enter Name + WA.", "#cc0000"); return; } if(!codeInput){ showNotification("Enter unlock code.", "#cc0000"); return; }
 
-  const adminMsg = `Payment Pending:\nName: ${name}\nWA #: ${wa}\nSend proof, admin will provide unlock code.`;
-  window.open(`https://wa.me/6285399652487?text=${encodeURIComponent(adminMsg)}`, "_blank");
-
-  showNotification("Enter unlock code provided by admin.", "#ffc107");
-}
-
-function checkUnlockCode(){
-  const name = document.getElementById("userNameInput").value.trim();
-  const wa = document.getElementById("userWAInput").value.trim();
-  const codeInput = document.getElementById("unlockCodeInput").value.trim().toUpperCase();
-  if(!name || !wa){ showNotification("Enter Name + WA.", "#cc0000"); return; }
-  if(!codeInput){ showNotification("Enter unlock code.", "#cc0000"); return; }
-
-  fetch("YOUR_GAS_URL", {
-    method:"POST",
-    body:JSON.stringify({name:name, wa:wa})
-  }).then(res=>res.json())
-    .then(data=>{
-      if(data.status==="approved" && codeInput===data.unlockCode.toUpperCase()){
-        showNotification("Unlock code valid! Redirecting...", "#28a745");
-        setTimeout(()=>{ window.location.href="URL_TO_YOUR_TEST"; },1000);
-      } else {
-        showNotification(data.message || "Invalid unlock code.", "#cc0000");
-      }
-    })
-    .catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
+fetch("YOUR_GAS_URL", { method:"POST", body:JSON.stringify({name:name, wa:wa}) })
+.then(res=>res.json())
+.then(data=>{
+if(data.status==="approved" && codeInput===data.unlockCode.toUpperCase()){
+showNotification("Unlock code valid! Redirecting...", "#28a745");
+setTimeout(()=>{ window.location.href="YOUR_TEST_URL"; },1000);
+}else{
+showNotification(data.message || "Invalid unlock code.", "#cc0000");
+}})
+.catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
 }
 </script>
 
