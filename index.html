@@ -1,29 +1,153 @@
-function checkUnlockCode() {
-  const codeInput = document.getElementById("unlockCodeInput").value.trim().toUpperCase();
-  if (!codeInput) { 
-    showNotification("Enter unlock code.", "#cc0000"); 
-    return; 
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nursing Prometric Test - Landing</title>
 
-  fetch("YOUR_GAS_URL_HERE", {
-    method: "POST",
-    body: JSON.stringify({ unlockCode: codeInput })
+<!-- OPENGRAPH -->
+<meta property="og:title" content="Nursing Prometric Test">
+<meta property="og:description" content="Try Demo Test for free or continue Full Test with admin-controlled unlock code.">
+<meta property="og:image" content="https://raw.githubusercontent.com/gyoutrain-lab/prometric-nursing-test-commerce2/main/assets/icon17%20(1).jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://gyoutrain-lab.github.io/prometric-nursing-test-commerce2/">
+<meta property="og:type" content="website">
+
+<!-- Fallback -->
+<link rel="image_src" href="https://raw.githubusercontent.com/gyoutrain-lab/prometric-nursing-test-commerce2/main/assets/icon17%20(1).jpg">
+
+<style>
+body, html { margin:0; padding:0; font-family:Arial,sans-serif; height:100%; overflow-x:hidden; background:#eef5f5; }
+
+.top-half { width:100%; height:50vh; background:url('assets/icon17%20(1).jpg') center/cover no-repeat; position:relative; }
+.bottom-half { width:100%; height:50vh; display:flex; flex-direction:column; justify-content:flex-end; align-items:flex-start; padding:20px; box-sizing:border-box; background:#eef5f5; position:relative; }
+.water-flow { position:absolute; top:0; left:0; width:200%; height:200%; background:url('assets/icon17%20(1).jpg') repeat; opacity:0.2; background-size:cover; animation:flow 15s linear infinite; pointer-events:none; }
+@keyframes flow { 0%{transform:translate(-50%,-50%) rotate(0deg);} 100%{transform:translate(-50%,-50%) rotate(360deg);} }
+
+.qr-container { position:absolute; bottom:20px; right:20px; width:25%; max-width:200px; z-index:2; opacity:1; }
+.user-info { margin-top:10px; font-size:0.9rem; color:#000; display:flex; flex-wrap:wrap; gap:10px; }
+.user-info input { padding:5px 10px; border-radius:5px; border:1px solid #ccc; font-size:0.9rem; width:calc(50% - 10px); }
+.social-icons { margin-top:15px; display:flex; gap:15px; z-index:2; position:relative; }
+.social-icons a img { width:40px; height:40px; cursor:pointer; transition:transform 0.3s; }
+.social-icons a img:hover { transform:scale(1.2); }
+
+.buttons { margin-top:15px; z-index:2; position:relative; display:flex; flex-wrap:wrap; gap:10px; }
+button { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-size:1rem; transition:0.3s; }
+#demo-btn { background-color:#ffc107; color:#000; }
+#demo-btn:hover { background-color:#e0a800; }
+#continue-btn { background-color:#28a745; color:#fff; }
+#continue-btn:hover { background-color:#218838; }
+#confirm-btn { background-color:#007bff; color:#fff; }
+#confirm-btn:hover { background-color:#0056b3; }
+input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5px; border:1px solid #ccc; }
+
+.notification { position:fixed; top:10px; left:50%; transform:translateX(-50%); padding:15px 20px; background-color:#007bff; color:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); font-size:1rem; display:none; z-index:9999; max-width:90%; text-align:center; }
+
+@media (max-width:768px){
+  .qr-container { width:50%; max-width:250px; }
+  .social-icons a img { width:30px; height:30px; }
+  .user-info input { width:100%; }
+  .buttons { flex-direction:column; gap:10px; }
+}
+
+#promoText { width:100%; text-align:center; margin-top:12px; position:relative; z-index:9999; }
+#promoText .p-line1 { font-size:1.8rem; font-weight:800; background: linear-gradient(to right, #001a66, #003399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+#promoText .p-line2 { font-size:1.1rem; margin-top:6px; background: linear-gradient(to right, #cc0000, #ff1a1a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+</style>
+</head>
+<body>
+
+<div class="notification" id="notificationBox"></div>
+
+<div class="top-half" id="topHalf" data-src="assets/icon17%20(1).jpg"></div>
+
+<div id="promoText">
+  <div class="p-line1">🩺Nursing Prometric Actual Simulation Test</div>
+  <div class="p-line2">500 test items based on SMLE & Enclex</div>
+  <div class="p-line3">Detailed rationale elaboration</div>
+</div>
+
+<div class="bottom-half">
+  <div class="water-flow"></div>
+  <img id="danaQR" class="qr-container" data-src="assets/dana_qr.png" alt="Dana QR">
+  <div class="user-info">
+    <input type="text" id="userNameInput" placeholder="Enter your name" required>
+    <input type="text" id="userWAInput" placeholder="Enter your WA #" required>
+  </div>
+  <div class="social-icons">
+    <a href="tel:+6285399652487"><img src="https://cdn-icons-png.flaticon.com/512/597/597177.png"></a>
+    <a href="https://wa.me/6285399652487" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png"></a>
+    <a href="mailto:gyoutrain@gmail.com" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png"></a>
+    <a href="https://web.facebook.com/gyouskill/" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png"></a>
+    <a href="https://www.instagram.com/etkyogya" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png"></a>
+  </div>
+
+  <div class="buttons">
+    <button id="demo-btn" onclick="window.location.href='https://gyoutrain-lab.github.io/prometric-nursing-test-demo/'">Demo Test (Free)</button>
+    <button id="confirm-btn" onclick="confirmPayment()">Confirmation</button>
+    <input type="text" class="unlock-code" id="unlockCodeInput" placeholder="Enter unlock code">
+    <button id="continue-btn" onclick="checkUnlockCode()">Continue Next Test</button>
+  </div>
+</div>
+
+<script>
+function lazyLoadImage(img){
+  const src = img.getAttribute('data-src');
+  if(src){ img.src = src; img.style.opacity=1; img.removeAttribute('data-src'); }
+}
+
+window.addEventListener('load',()=>{
+  const top=document.getElementById('topHalf');
+  const qr=document.getElementById('danaQR');
+  top.style.backgroundImage=`url('${top.getAttribute('data-src')}')`;
+  lazyLoadImage(qr);
+});
+
+function showNotification(msg,color="#007bff",duration=3500){
+  const box=document.getElementById("notificationBox");
+  box.style.backgroundColor=color;
+  box.innerText=msg;
+  box.style.display="block";
+  setTimeout(()=>{ box.style.display="none"; },duration);
+}
+
+function confirmPayment(){
+  const name=document.getElementById("userNameInput").value.trim();
+  const wa=document.getElementById("userWAInput").value.trim();
+  if(!name || !wa){ showNotification("Please fill Name + WA.", "#cc0000"); return; }
+  const adminMsg=`Payment Pending:\nName: ${name}\nWA #: ${wa}\nCheck QR Dana - Share proof - Admin will give Unlock Code.`;
+  window.open(`https://wa.me/6285399652487?text=${encodeURIComponent(adminMsg)}`,"_blank");
+  showNotification("Wait for admin to provide unlock code.", "#ffc107");
+}
+
+function checkUnlockCode(){
+  const codeInput=document.getElementById("unlockCodeInput").value.trim().toUpperCase();
+  if(!codeInput){ showNotification("Enter unlock code.", "#cc0000"); return; }
+
+  const GAS_URL="YOUR_GAS_EXEC_URL"; // <-- replace with your Apps Script URL
+
+  fetch(GAS_URL,{
+    method:"POST",
+    body:JSON.stringify({ unlockCode: codeInput })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "approved") {
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.status==="approved"){
       showNotification("Unlock code valid! Redirecting...", "#28a745");
-      setTimeout(() => {
-        window.location.href = "https://gyoutrain-lab.github.io/nursing-prometric-test-allinone500/";
-      }, 1000);
-    } else if (data.status === "invalid") {
+      setTimeout(()=>{ window.location.href="https://gyoutrain-lab.github.io/nursing-prometric-test-allinone500/"; },1000);
+    } else if(data.status==="invalid"){
       showNotification("Invalid unlock code.", "#cc0000");
-    } else if (data.status === "error") {
-      showNotification("Error: " + data.message, "#cc0000");
+    } else if(data.status==="error"){
+      showNotification("Error: "+data.message, "#cc0000");
     }
   })
-  .catch(err => {
+  .catch(err=>{
     console.log(err);
     showNotification("Connection error.", "#cc0000");
   });
 }
+</script>
+
+</body>
+</html>
