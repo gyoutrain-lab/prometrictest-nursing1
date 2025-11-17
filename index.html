@@ -1,181 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nursing Prometric Simulation Test</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    body{font-family:Roboto,Segoe UI,sans-serif;background:#f5f8ff;color:#111;margin:0;padding:0}
-    .container{max-width:900px;margin:auto;padding:24px}
-    h2{text-align:center;color:#003366;font-size:3.6rem;line-height:1.4;margin-bottom:20px;font-weight:700}
-    h2 small{font-size:2.2rem;color:#444;display:block;margin-top:5px;font-weight:500}
-    .question-box{background:#fff;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 3px 8px rgba(0,0,0,0.1);font-size:1.2rem;line-height:1.5;color:#000;min-height:15vh;text-align:left}
-    .options-box{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 10px rgba(0,0,0,0.12);font-size:2.2rem;line-height:1.7;color:#000;display:flex;flex-direction:column;justify-content:center;gap:20px;min-height:60vh}
-    .info{background:#eaf1ff;padding:18px 20px;border-radius:12px;margin-bottom:18px;font-size:2rem;text-align:center;font-weight:700;color:#1a1a1a}
-    .option{display:block;background:#fff;border:2px solid #bbb;border-radius:14px;padding:22px;margin-top:10px;cursor:pointer;transition:background 0.2s, transform 0.1s;font-size:2.2rem;font-weight:600;text-align:left}
-    .option:hover{transform:scale(1.03)}
-    .option.correct{background:#d4ebff;border-color:#0055aa}
-    .option.incorrect{background:#ffe0e0;border-color:#cc0000}
-    .rationale{margin-top:20px;background:#f1f7ff;padding:20px;border-left:5px solid #007bff;border-radius:12px;font-size:2rem;line-height:1.8;font-weight:500}
-    .next-btn{display:block;width:100%;text-align:center;background:#007bff;color:#fff;padding:20px;margin-top:24px;border:none;border-radius:12px;font-size:2.2rem;cursor:pointer;font-weight:700;transition:background 0.3s ease}
-    .next-btn:hover{background:#005bb5}
-    footer{text-align:center;margin-top:30px;font-size:1.8rem;color:#FF0000;font-weight:500}
-    .small{font-size:1.4rem}
-    .center{text-align:center}
-    .btn{display:inline-block;padding:12px 18px;border-radius:8px;background:#007bff;color:#fff;text-decoration:none;cursor:pointer}
-    .input{padding:10px;border-radius:8px;border:1px solid #ccc;font-size:1.6rem;width:100%}
-    @media (max-width:600px){h2{font-size:2.8rem}h2 small{font-size:2rem}.info{font-size:1.8rem;padding:16px}.question-box{font-size:2.2rem;padding:22px;min-height:28vh}.options-box{font-size:2.2rem;padding:22px;min-height:62vh}.option{font-size:2.1rem;padding:18px}.rationale{font-size:1.9rem}.next-btn{font-size:2rem;padding:18px}footer{font-size:1.7rem}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nursing Prometric Simulation Test</title>
+<style>
+body, html { margin:0; padding:0; font-family:Arial,sans-serif; background:#eef5f5; }
+.container { max-width:900px; margin:auto; padding:24px; }
+h2{text-align:center; color:#003366; font-size:3rem; margin-bottom:20px;}
+h2 small{font-size:1.5rem; display:block; margin-top:5px; color:#444;}
+input.unlock-code { padding:10px; width:200px; margin-right:10px; border-radius:5px; border:1px solid #ccc; font-size:1rem; }
+button { padding:10px 20px; border:none; border-radius:5px; cursor:pointer; background:#28a745; color:#fff; font-size:1rem; }
+button:disabled { background:#ccc; cursor:not-allowed; }
+.notification { position:fixed; top:10px; left:50%; transform:translateX(-50%); padding:15px 20px; background-color:#007bff; color:#fff; border-radius:8px; display:none; z-index:9999; }
+footer { text-align:center; font-size:0.9rem; color:red; margin-top:20px; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2>🩺 (All in One) Nursing Prometric Simulation Test<br><small>Adapted from Prometric/SMLE and NCLEX materials</small></h2>
 
-    <div id="quizBox"></div>
+<div class="container">
+  <h2>🩺 (All in One) Nursing Prometric Simulation Test<br><small>Adapted from Prometric/SMLE and NCLEX materials</small></h2>
 
-    <footer style="font-size:0.67rem; font-weight:normal; color:red; text-align:center; margin-top:12px; line-height:1.2;">
-      Prepared by: <b>Giyono Asfarrasyid, ETK Yogyakarta</b>
-    </footer>
+  <div>
+    <input type="text" id="unlockCodeInput" class="unlock-code" placeholder="Enter unlock code">
+    <button id="continueBtn" onclick="checkUnlockCode()" disabled>Continue to Test</button>
   </div>
 
-  <!-- Public-domain sound -->
-  <audio id="correctSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.wav" preload="auto"></audio>
+  <div class="notification" id="notificationBox"></div>
 
-  <script>
-    const DEVICE_KEY = 'prometric_device_id_v1';
+  <footer>
+    Prepared by: <b>Giyono Asfarrasyid, ETK Yogyakarta</b>
+  </footer>
+</div>
 
-    function getDeviceId() {
-      let id = localStorage.getItem(DEVICE_KEY);
-      if (!id) {
-        if (window.crypto && window.crypto.randomUUID) id = window.crypto.randomUUID();
-        else id = 'd-' + Date.now() + '-' + Math.floor(Math.random()*1e9);
-        localStorage.setItem(DEVICE_KEY, id);
-      }
-      return id;
-    }
+<script>
+// Replace this with the code your admin gives you from the sheet
+let unlockCode = ""; 
+let approved = false;
 
-    function showTokenEntry(prefilledToken) {
-      const val = prefilledToken || '';
-      document.getElementById('quizBox').innerHTML = `
-        <div class="question-box center">
-          <h3>Enter Unlock Code</h3>
-          <p class="small">Please enter the unlock code given by admin after payment confirmation.</p>
-          <div style="margin-top:12px;">
-            <input id="tokenInput" class="input" placeholder="Enter unlock code" value="${val}">
-          </div>
-          <div style="margin-top:12px;" class="center">
-            <button class="btn" onclick="submitToken()">Continue to Test</button>
-          </div>
-        </div>
-      `;
-    }
+// Simulate checking the code from backend
+function checkUnlockCode(){
+  const codeInput = document.getElementById("unlockCodeInput").value.trim().toUpperCase();
+  if(!codeInput){ showNotification("Enter unlock code."); return; }
+  if(!approved){ showNotification("Admin approval required."); return; }
+  if(codeInput === unlockCode){
+    showNotification("Unlock valid! Redirecting...", "#28a745");
+    setTimeout(()=>{ 
+      window.location.href = "https://script.google.com/macros/s/AKfycbwYfVBD3Lb7uIzGynRnnXJYJSwe5FdCqg1DcCxuMDm6C6WToz_gxmWWacEZFv1arwUG/exec";
+    }, 800);
+  } else {
+    showNotification("Invalid unlock code.", "#cc0000");
+  }
+}
 
-    function showAccessDenied(reason) {
-      document.getElementById('quizBox').innerHTML = `
-        <div class="question-box">
-          <h3>⛔ Access Denied</h3>
-          <p>${reason || 'You are not authorized to access this test from this device.'}</p>
-          <p>If you lost your token, please contact admin.</p>
-        </div>
-      `;
-    }
+// Notification helper
+function showNotification(msg, color="#007bff"){
+  const box = document.getElementById("notificationBox");
+  box.style.backgroundColor = color;
+  box.innerText = msg;
+  box.style.display = "block";
+  setTimeout(()=>{ box.style.display = "none"; }, 3000);
+}
 
-    function submitToken() {
-      const el = document.getElementById('tokenInput');
-      if (!el) return;
-      const token = el.value && el.value.trim();
-      if (!token) { alert('Please enter the unlock code.'); return; }
+// Mock fetching unlock code from sheet: ADMIN sets this manually
+// Example: after payment, set unlockCode and enable button
+function setUnlockCodeFromAdmin(code){
+  unlockCode = code.toUpperCase();
+  approved = true;
+  document.getElementById("continueBtn").disabled = false;
+  showNotification("Payment approved. Enter unlock code.", "#28a745");
+}
 
-      const deviceId = getDeviceId();
+// ---- Example: admin sets code here ----
+setUnlockCodeFromAdmin("XO5U2T"); // replace with actual unlock code from sheet
+</script>
 
-      google.script.run
-        .withSuccessHandler(res => {
-          if (!res || !res.ok) return showAccessDenied(res.reason);
-          window.__STUDENT_NAME = res.name || '';
-          startTest();
-        })
-        .withFailureHandler(() => { showAccessDenied('Server error.'); })
-        .checkAndBindToken(token, deviceId);
-
-      window.__TOKEN_IN_USE = token;
-    }
-
-    // ---------- Test Flow -------------
-    let questions = [], current = 0, correct = 0, incorrect = 0;
-    const startTime = new Date();
-
-    function startTest() {
-      google.script.run.withSuccessHandler(qs => {
-        questions = qs || [];
-        current = 0; correct = 0; incorrect = 0;
-        renderQuestion();
-      }).getQuestions();
-    }
-
-    function renderQuestion() {
-      const q = questions[current];
-      if (!q) return showResult();
-      document.getElementById('quizBox').innerHTML = `
-        <div class="info" style="font-size:0.9rem; line-height:1.2; margin-bottom:8px;">
-          ⏱ ${formatTime()} | Question ${q.number}/${questions.length} | ✅ ${correct} | ❌ ${incorrect}
-        </div>
-        <div class="question-box">
-          <p><b>Q${q.number}.</b> ${q.question}</p>
-        </div>
-        <div class="options-box">
-          ${['A','B','C','D'].map((l,i)=>
-            `<div class="option" onclick="checkAnswer(this,'${l}','${q.correct}','${q.rationale}')">${l}. ${q.options[i]}</div>`
-          ).join('')}
-          <div id="rationale"></div>
-          <button class="next-btn" onclick="next()">Next</button>
-        </div>
-      `;
-    }
-
-    function checkAnswer(el, ans, correctAns, rationale) {
-      const opts = document.querySelectorAll('.option');
-      opts.forEach(o => o.style.pointerEvents = 'none');
-
-      if (ans === correctAns) {
-        try { const audio = document.getElementById("correctSound"); if(audio) audio.play().catch(()=>{}); } catch(e){}
-        el.classList.add('correct'); correct++;
-      } else {
-        el.classList.add('incorrect'); incorrect++;
-        opts.forEach(o => { if(o.textContent.trim().startsWith(correctAns)) o.classList.add('correct'); });
-      }
-
-      document.getElementById('rationale').innerHTML = `
-        <div class="rationale" style="color:#0055cc;">
-          <strong>💡 Rationale:</strong> ${rationale || "No explanation available."}
-        </div>`;
-    }
-
-    function next() { current++; if(current<questions.length) renderQuestion(); else showResult(); }
-
-    function showResult() {
-      const timeUsed = Math.floor((new Date() - startTime)/1000);
-      const score = questions.length ? Math.round((correct/questions.length)*100) : 0;
-      const studentName = window.__STUDENT_NAME || 'Guest';
-      document.getElementById('quizBox').innerHTML = `
-        <div class="question-box">
-          <h3>✅ Test Completed</h3>
-          <p><b>${studentName} — Score:</b> ${score}%</p>
-          <p>✅ Correct: ${correct} | ❌ Incorrect: ${incorrect}</p>
-        </div>`;
-      const deviceId = getDeviceId();
-      google.script.run.submitResult(studentName, score, correct, incorrect, timeUsed, window.__TOKEN_IN_USE, deviceId);
-    }
-
-    function formatTime() {
-      const elapsed = Math.floor((new Date() - startTime)/1000);
-      const remain = 500*60 - elapsed;
-      const m = Math.floor(remain/60);
-      const s = remain%60;
-      return `${m}:${s.toString().padStart(2,'0')}`;
-    }
-
-    // INIT
-    (function init(){ showTokenEntry(''); })();
-  </script>
 </body>
 </html>
