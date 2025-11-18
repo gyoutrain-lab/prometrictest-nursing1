@@ -24,6 +24,10 @@ button { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font
 #confirm-btn { background-color:#007bff; color:#fff; } #confirm-btn:hover { background-color:#0056b3; }
 input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5px; border:1px solid #ccc; }
 .notification { position:fixed; top:10px; left:50%; transform:translateX(-50%); padding:15px 20px; background-color:#007bff; color:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); font-size:1rem; display:none; z-index:9999; max-width:90%; text-align:center; }
+#promoText { width: 100%; text-align: center; margin-top: 12px; position: relative; z-index: 9999; }
+#promoText .p-line1 { font-size: 1.8rem; font-weight: 800; background: linear-gradient(to right, #001a66, #003399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#promoText .p-line2 { font-size: 1.1rem; margin-top: 6px; background: linear-gradient(to right, #cc0000, #ff1a1a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+@media (max-width:768px){ .qr-container { width:50%; max-width:250px; } .social-icons a img { width:30px; height:30px; } .user-info input { width:100%; } .buttons { flex-direction:column; gap:10px; } }
 </style>
 </head>
 <body>
@@ -31,6 +35,12 @@ input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5
 <div class="notification" id="notificationBox"></div>
 
 <div class="top-half" id="topHalf" data-src="assets/icon17%20(1).jpg"></div>
+
+<div id="promoText">
+  <div class="p-line1">🩺Nursing Prometric Actual Simulation Test</div>
+  <div class="p-line2">500 test items based on SMLE & Enclex Materials</div>
+  <div class="p-line3">with detailed rationale content</div>
+</div>
 
 <div class="bottom-half">
   <div class="water-flow"></div>
@@ -45,6 +55,8 @@ input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5
     <a href="tel:+6285399652487"><img src="https://cdn-icons-png.flaticon.com/512/597/597177.png"></a>
     <a href="https://wa.me/6285399652487" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png"></a>
     <a href="mailto:gyoutrain@gmail.com" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png"></a>
+    <a href="https://web.facebook.com/gyouskill/" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png"></a>
+    <a href="https://www.instagram.com/etkyogya" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png"></a>
   </div>
 
   <div class="buttons">
@@ -68,7 +80,7 @@ window.addEventListener('load', ()=>{
   lazyLoadImage(qr);
 });
 
-function showNotification(msg,color="#007bff",duration=3500){
+function showNotification(msg,color="#007bff",duration=4000){
   const box=document.getElementById("notificationBox");
   box.style.backgroundColor=color;
   box.innerText=msg;
@@ -76,17 +88,28 @@ function showNotification(msg,color="#007bff",duration=3500){
   setTimeout(()=>{ box.style.display="none"; }, duration);
 }
 
+// **Confirmation Button**
 function confirmPayment(){
   const name = document.getElementById("userNameInput").value.trim();
   const wa = document.getElementById("userWAInput").value.trim();
   if(!name || !wa){ showNotification("Please fill Name + WA.", "#cc0000"); return; }
 
-  const adminMsg = `Payment Pending:\nName: ${name}\nWA #: ${wa}\nSend proof, admin will provide unlock code.`;
-  window.open(`https://wa.me/6285399652487?text=${encodeURIComponent(adminMsg)}`, "_blank");
-
-  showNotification("Enter unlock code provided by admin.", "#ffc107");
+  fetch("https://script.google.com/macros/s/AKfycbwNQBaH_k11QZgMycuX1Pp0dxsGxd-ua8P2sjTNK7u_CDqQ8q6QosBKlgBKVQFoWgFzrw/exec", {
+    method:"POST",
+    body: JSON.stringify({name:name, wa:wa})
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.status==="pending"){
+      showNotification(`Unlock code: ${data.unlockCode}`, "#ffc107", 8000);
+    } else if(data.status==="error"){
+      showNotification(data.message, "#cc0000");
+    }
+  })
+  .catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
 }
 
+// **Continue Button**
 function checkUnlockCode(){
   const name = document.getElementById("userNameInput").value.trim();
   const wa = document.getElementById("userWAInput").value.trim();
@@ -94,19 +117,20 @@ function checkUnlockCode(){
   if(!name || !wa){ showNotification("Enter Name + WA.", "#cc0000"); return; }
   if(!codeInput){ showNotification("Enter unlock code.", "#cc0000"); return; }
 
-  fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", { // <-- replace with your Apps Script URL
+  fetch("https://script.google.com/macros/s/AKfycbwNQBaH_k11QZgMycuX1Pp0dxsGxd-ua8P2sjTNK7u_CDqQ8q6QosBKlgBKVQFoWgFzrw/exec", {
     method:"POST",
-    body:JSON.stringify({name:name, wa:wa, unlockCode:codeInput})
-  }).then(res=>res.json())
-    .then(data=>{
-      if(data.status==="approved"){
-        showNotification("Unlock code valid! Redirecting...", "#28a745");
-        setTimeout(()=>{ window.location.href="https://gyoutrain-lab.github.io/prometric-nursing-test-full/"; },1000); // <-- replace with your test URL
-      } else {
-        showNotification(data.message || "Invalid unlock code.", "#cc0000");
-      }
-    })
-    .catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
+    body: JSON.stringify({name:name, wa:wa, unlockCode: codeInput})
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.status==="approved"){
+      showNotification("Unlock code valid! Redirecting...", "#28a745");
+      setTimeout(()=>{ window.location.href="https://gyoutrain-lab.github.io/prometric-nursing-test-demo/"; }, 1200);
+    } else {
+      showNotification(data.message || "Invalid unlock code.", "#cc0000");
+    }
+  })
+  .catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
 }
 </script>
 
