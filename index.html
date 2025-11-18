@@ -1,7 +1,40 @@
-<script>
-const backendURL = "YOUR_DEPLOYED_SCRIPT_URL_HERE";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nursing Unlock Test Page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: Arial; padding: 20px; }
+  input { width: 100%; padding: 10px; margin: 10px 0; }
+  button { padding: 12px; width: 100%; font-size: 16px; }
+  #lockedContent { display: none; margin-top:20px; padding: 20px; background:#e8ffe8; border:1px solid #00a347; }
+</style>
+</head>
+<body>
 
-// Enable button only when fields filled
+<h2>Nursing Unlock System</h2>
+
+<label>Name</label>
+<input type="text" id="name" placeholder="Enter your name">
+
+<label>WhatsApp Number</label>
+<input type="text" id="wa" placeholder="Enter your WA number">
+
+<button id="confirmBtn" disabled>Send Payment Confirmation</button>
+
+<br><br>
+<button onclick="unlockPopup()">Enter Unlock Code</button>
+
+<div id="lockedContent">
+  <h3>✔ UNLOCK SUCCESS</h3>
+  <p>Your content is now unlocked.</p>
+</div>
+
+<script>
+const backendURL = "https://script.google.com/macros/s/AKfycbyUyw3cpCEdDi9vJ4-eh22SRX_4m1YRQa8eYbPEw11QGREmlJvf-ISIBMfTUBUrNwq-hw/exec";
+
+// Enable confirm button only when fields filled
 function checkInputs() {
   const n = document.getElementById("name").value.trim();
   const w = document.getElementById("wa").value.trim();
@@ -11,7 +44,7 @@ function checkInputs() {
 document.getElementById("name").addEventListener("input", checkInputs);
 document.getElementById("wa").addEventListener("input", checkInputs);
 
-// User submits → generate code + send to admin WA
+// USER → send payment confirmation → backend logs → admin WA
 document.getElementById("confirmBtn").addEventListener("click", async () => {
   const name = document.getElementById("name").value.trim();
   const wa = document.getElementById("wa").value.trim();
@@ -29,17 +62,18 @@ document.getElementById("confirmBtn").addEventListener("click", async () => {
 
   if (json.error) return alert(json.error);
 
+  // Message to admin
   const adminMsg = encodeURIComponent(
     `Payment Proof and Confirmation\nName: ${name}\nWA: ${wa}\nGenerated Code: ${json.generatedCode}`
   );
 
-  // open admin WA
-  window.open(`https://wa.me/62ADMINNUMBER?text=${adminMsg}`, "_blank");
+  // 👉 PUT YOUR ADMIN NUMBER HERE
+  window.open(`https://wa.me/62xxxxxxxxxx?text=${adminMsg}`, "_blank");
 
-  alert("Payment confirmation sent to admin. Wait for your unlock code.");
+  alert("Payment confirmation sent to admin.\nPlease wait for the unlock code.");
 });
 
-// Admin popup enter code → validate
+// ADMIN unlocks
 async function unlockPopup() {
   const code = prompt("Enter unlock code from admin:");
   if (!code) return;
@@ -56,7 +90,6 @@ async function unlockPopup() {
 
   if (json.status === "valid") {
     alert("UNLOCK SUCCESS!");
-    // show hidden content
     document.getElementById("lockedContent").style.display = "block";
   } else {
     alert("INVALID CODE. Try again.");
@@ -64,3 +97,6 @@ async function unlockPopup() {
   }
 }
 </script>
+
+</body>
+</html>
