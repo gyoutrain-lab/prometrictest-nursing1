@@ -5,12 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nursing Prometric Test - Landing</title>
 
+<!-- OG Thumbnail -->
+<meta property="og:title" content="Nursing Prometric Test">
+<meta property="og:description" content="Try Demo Test for free or continue Full Test with admin-controlled unlock code.">
+<meta property="og:image" content="https://raw.githubusercontent.com/gyoutrain-lab/prometric-nursing-test-commerce2/main/assets/icon17%20(1).jpg">
+
 <style>
 body, html { margin:0; padding:0; font-family:Arial,sans-serif; height:100%; overflow-x:hidden; background:#eef5f5; }
 .top-half { width:100%; height:50vh; background:url('assets/icon17%20(1).jpg') center/cover no-repeat; position:relative; }
 .bottom-half { width:100%; height:50vh; position:relative; display:flex; flex-direction:column; justify-content:flex-end; align-items:flex-start; padding:20px; box-sizing:border-box; overflow:hidden; background:#eef5f5; }
-.water-flow { position:absolute; top:0; left:0; width:200%; height:200%; background:url('assets/icon17%20(1).jpg') repeat; opacity:0.2; background-size:cover; animation:flow 15s linear infinite; pointer-events:none; }
-@keyframes flow { 0%{transform:translate(-50%,-50%) rotate(0deg);} 100%{transform:translate(-50%,-50%) rotate(360deg);} }
+.water-flow { position:absolute; bottom:0; left:0; width:200%; height:100%; background:url('assets/icon17%20(1).jpg') repeat; opacity:0.2; background-size:cover; animation:flow 15s linear infinite; pointer-events:none; }
+@keyframes flow { 0%{transform:translate(-50%,0) rotate(0deg);} 100%{transform:translate(-50%,0) rotate(360deg);} }
 .qr-container { position:absolute; bottom:20px; right:20px; width:25%; max-width:200px; z-index:2; opacity:1; }
 .user-info { margin-top:10px; font-size:0.9rem; color:#000; display:flex; flex-wrap:wrap; gap:10px; }
 .user-info input { padding:5px 10px; border-radius:5px; border:1px solid #ccc; font-size:0.9rem; width:calc(50% - 10px); }
@@ -24,10 +29,10 @@ button { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font
 #confirm-btn { background-color:#007bff; color:#fff; } #confirm-btn:hover { background-color:#0056b3; }
 input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5px; border:1px solid #ccc; }
 .notification { position:fixed; top:10px; left:50%; transform:translateX(-50%); padding:15px 20px; background-color:#007bff; color:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); font-size:1rem; display:none; z-index:9999; max-width:90%; text-align:center; }
+@media (max-width:768px){ .qr-container { width:50%; max-width:250px; } .social-icons a img { width:30px; height:30px; } .user-info input { width:100%; } .buttons { flex-direction:column; gap:10px; } }
 #promoText { width: 100%; text-align: center; margin-top: 12px; position: relative; z-index: 9999; }
 #promoText .p-line1 { font-size: 1.8rem; font-weight: 800; background: linear-gradient(to right, #001a66, #003399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 #promoText .p-line2 { font-size: 1.1rem; margin-top: 6px; background: linear-gradient(to right, #cc0000, #ff1a1a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-@media (max-width:768px){ .qr-container { width:50%; max-width:250px; } .social-icons a img { width:30px; height:30px; } .user-info input { width:100%; } .buttons { flex-direction:column; gap:10px; } }
 </style>
 </head>
 <body>
@@ -68,6 +73,8 @@ input.unlock-code { padding:5px; width:150px; margin-right:10px; border-radius:5
 </div>
 
 <script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbwNQBaH_k11QZgMycuX1Pp0dxsGxd-ua8P2sjTNK7u_CDqQ8q6QosBKlgBKVQFoWgFzrw/exec";
+
 function lazyLoadImage(img){
   const src = img.getAttribute('data-src');
   if(src){ img.src = src; img.style.opacity=1; img.removeAttribute('data-src'); }
@@ -80,7 +87,7 @@ window.addEventListener('load', ()=>{
   lazyLoadImage(qr);
 });
 
-function showNotification(msg,color="#007bff",duration=4000){
+function showNotification(msg,color="#007bff",duration=3500){
   const box=document.getElementById("notificationBox");
   box.style.backgroundColor=color;
   box.innerText=msg;
@@ -88,28 +95,27 @@ function showNotification(msg,color="#007bff",duration=4000){
   setTimeout(()=>{ box.style.display="none"; }, duration);
 }
 
-// **Confirmation Button**
 function confirmPayment(){
   const name = document.getElementById("userNameInput").value.trim();
   const wa = document.getElementById("userWAInput").value.trim();
   if(!name || !wa){ showNotification("Please fill Name + WA.", "#cc0000"); return; }
 
-  fetch("https://script.google.com/macros/s/AKfycbwNQBaH_k11QZgMycuX1Pp0dxsGxd-ua8P2sjTNK7u_CDqQ8q6QosBKlgBKVQFoWgFzrw/exec", {
-    method:"POST",
-    body: JSON.stringify({name:name, wa:wa})
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.status==="pending"){
-      showNotification(`Unlock code: ${data.unlockCode}`, "#ffc107", 8000);
-    } else if(data.status==="error"){
-      showNotification(data.message, "#cc0000");
-    }
-  })
-  .catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
+  const adminMsg = `Payment Pending:\nName: ${name}\nWA #: ${wa}\nSend proof, admin will provide unlock code.`;
+  window.open(`https://wa.me/6285399652487?text=${encodeURIComponent(adminMsg)}`, "_blank");
+
+  // Request unlock code from server
+  fetch(`${scriptURL}?action=requestCode&name=${encodeURIComponent(name)}&wa=${encodeURIComponent(wa)}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data.status==="pending"){
+        showNotification(`Unlock code requested. Admin will provide it.`, "#ffc107", 8000);
+      } else if(data.status==="error"){
+        showNotification(data.message, "#cc0000");
+      }
+    })
+    .catch(err => { console.log(err); showNotification("Server error", "#cc0000"); });
 }
 
-// **Continue Button**
 function checkUnlockCode(){
   const name = document.getElementById("userNameInput").value.trim();
   const wa = document.getElementById("userWAInput").value.trim();
@@ -117,20 +123,17 @@ function checkUnlockCode(){
   if(!name || !wa){ showNotification("Enter Name + WA.", "#cc0000"); return; }
   if(!codeInput){ showNotification("Enter unlock code.", "#cc0000"); return; }
 
-  fetch("https://script.google.com/macros/s/AKfycbwNQBaH_k11QZgMycuX1Pp0dxsGxd-ua8P2sjTNK7u_CDqQ8q6QosBKlgBKVQFoWgFzrw/exec", {
-    method:"POST",
-    body: JSON.stringify({name:name, wa:wa, unlockCode: codeInput})
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.status==="approved"){
-      showNotification("Unlock code valid! Redirecting...", "#28a745");
-      setTimeout(()=>{ window.location.href="https://gyoutrain-lab.github.io/prometric-nursing-test-demo/"; }, 1200);
-    } else {
-      showNotification(data.message || "Invalid unlock code.", "#cc0000");
-    }
-  })
-  .catch(err=>{ console.log(err); showNotification("Server error", "#cc0000"); });
+  fetch(`${scriptURL}?action=validateCode&name=${encodeURIComponent(name)}&wa=${encodeURIComponent(wa)}&unlockCode=${encodeURIComponent(codeInput)}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data.status==="approved"){
+        showNotification("Unlock code valid! Redirecting...", "#28a745");
+        setTimeout(()=>{ window.location.href="https://gyoutrain-lab.github.io/prometric-nursing-test-demo/"; }, 1200);
+      } else {
+        showNotification(data.message || "Invalid unlock code.", "#cc0000");
+      }
+    })
+    .catch(err => { console.log(err); showNotification("Server error", "#cc0000"); });
 }
 </script>
 
